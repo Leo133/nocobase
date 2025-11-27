@@ -84,6 +84,13 @@ export default {
   'PIN set up successfully': 'PIN set up successfully',
   'You must be logged in to validate PIN': 'You must be logged in to validate PIN',
   'You must be logged in': 'You must be logged in',
+  'Invalid state parameter - possible CSRF attack': 'Invalid state parameter - possible CSRF attack',
+  'Invalid relay state - possible CSRF attack': 'Invalid relay state - possible CSRF attack',
+  'Failed to initiate OIDC login': 'Failed to initiate OIDC login',
+  'Failed to initiate SAML login': 'Failed to initiate SAML login',
+  'Failed to initiate OAuth login': 'Failed to initiate OAuth login',
+  'Failed to set up PIN': 'Failed to set up PIN',
+  'Allow PIN Authentication': 'Allow PIN Authentication',
 
   // UI
   'Sign in with OIDC': 'Sign in with OIDC',

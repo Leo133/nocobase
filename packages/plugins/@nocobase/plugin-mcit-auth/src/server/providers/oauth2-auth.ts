@@ -91,19 +91,34 @@ export class OAuth2Auth extends BaseAuth {
       throw new Error('Failed to exchange authorization code');
     }
 
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
+    const contentType = response.headers.get('content-type') || '';
+    
+    // Prefer JSON response format
+    if (contentType.includes('application/json')) {
       return response.json();
     }
 
-    // Some OAuth providers return form-encoded response
-    const text = await response.text();
-    const params = new URLSearchParams(text);
-    return {
-      access_token: params.get('access_token') || '',
-      token_type: params.get('token_type') || undefined,
-      refresh_token: params.get('refresh_token') || undefined,
-    };
+    // Handle form-urlencoded response (some OAuth providers like GitHub use this)
+    if (contentType.includes('application/x-www-form-urlencoded')) {
+      const text = await response.text();
+      const params = new URLSearchParams(text);
+      const accessToken = params.get('access_token');
+      if (!accessToken) {
+        throw new Error('No access token in response');
+      }
+      return {
+        access_token: accessToken,
+        token_type: params.get('token_type') || undefined,
+        refresh_token: params.get('refresh_token') || undefined,
+      };
+    }
+
+    // Default: try JSON parsing as fallback
+    try {
+      return response.json();
+    } catch {
+      throw new Error('Unable to parse token response');
+    }
   }
 
   /**

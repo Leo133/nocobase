@@ -99,6 +99,25 @@ async function callback(ctx: Context, next: Next) {
     ctx.throw(400, ctx.t('Authenticator name is required', { ns: namespace }));
   }
 
+  // Validate state parameter for CSRF protection (OAuth/OIDC flows)
+  if (state) {
+    const storedState = ctx.session?.authState;
+    if (!storedState || storedState !== state) {
+      ctx.throw(400, ctx.t('Invalid state parameter - possible CSRF attack', { ns: namespace }));
+    }
+    // Clear the state after validation
+    delete ctx.session.authState;
+  }
+
+  // Validate relay state for SAML flows
+  if (RelayState) {
+    const storedState = ctx.session?.authState;
+    if (!storedState || storedState !== RelayState) {
+      ctx.throw(400, ctx.t('Invalid relay state - possible CSRF attack', { ns: namespace }));
+    }
+    delete ctx.session.authState;
+  }
+
   // Get authenticator configuration
   const authenticatorsRepo = ctx.db.getRepository('authenticators');
   const authenticator = await authenticatorsRepo.findOne({

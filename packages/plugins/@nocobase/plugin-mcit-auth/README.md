@@ -94,6 +94,32 @@ All SSO providers support configurable user mapping to map provider attributes t
 | `mcitAuth:validatePin` | POST | Validate PIN |
 | `mcitAuth:hasPinSetup` | GET | Check if user has PIN set up |
 
+## Security Considerations
+
+### SSO Implementations
+
+The SSO implementations in this plugin provide basic functionality for OIDC, SAML, and OAuth 2.0 authentication. For production deployments with high security requirements, consider the following:
+
+**OIDC**: 
+- The current implementation does not perform full ID token signature validation
+- For production use, consider integrating `openid-client` library for full OIDC compliance
+- Ensure proper validation of `iss`, `aud`, `exp`, and `nonce` claims
+
+**SAML**:
+- The current SAML response parsing is simplified and does not validate XML signatures
+- For production use, integrate `@node-saml/node-saml` or similar library
+- Ensure proper certificate validation and replay attack prevention
+
+**OAuth 2.0**:
+- State parameter validation is implemented for CSRF protection
+- Consider implementing PKCE (Proof Key for Code Exchange) for additional security
+
+### PIN Authentication
+
+- PINs are securely hashed using PBKDF2 with SHA-512 and unique salts
+- Account lockout is implemented after configurable failed attempts
+- Timing-safe comparison is used to prevent timing attacks
+
 ## License
 
 AGPL-3.0 and NocoBase Commercial License

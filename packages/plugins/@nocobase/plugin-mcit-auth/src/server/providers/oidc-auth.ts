@@ -63,6 +63,13 @@ export class OIDCAuth extends BaseAuth {
 
   /**
    * Exchange authorization code for tokens
+   * 
+   * SECURITY NOTE: This implementation retrieves tokens from the OIDC provider
+   * but does not perform full ID token validation (signature verification,
+   * issuer validation, audience validation). For production use, consider:
+   * - Using a library like 'openid-client' for full OIDC compliance
+   * - Validating the ID token's signature against the issuer's JWKS
+   * - Verifying the 'iss', 'aud', 'exp', and 'nonce' claims
    */
   async exchangeCode(code: string): Promise<{ access_token: string; id_token?: string }> {
     const options = this.getOIDCOptions();

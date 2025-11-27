@@ -91,13 +91,24 @@ export class SAMLAuth extends BaseAuth {
 
   /**
    * Parse SAML response and extract user attributes
+   * 
+   * SECURITY NOTE: This is a simplified implementation for demonstration purposes.
+   * For production use, integrate a proper SAML library such as @node-saml/node-saml
+   * that handles:
+   * - XML signature validation
+   * - Certificate verification
+   * - Replay attack prevention
+   * - Proper XML parsing with namespace handling
+   * 
+   * The regex-based parsing here is vulnerable to XML injection and does not
+   * validate SAML response signatures.
    */
   parseSAMLResponse(samlResponse: string): Record<string, any> {
     // Decode the SAML response
     const decodedResponse = Buffer.from(samlResponse, 'base64').toString('utf-8');
 
     // Basic XML parsing to extract attributes
-    // In production, use a proper SAML library for secure parsing
+    // WARNING: This is NOT secure for production use - use a proper SAML library
     const attributes: Record<string, any> = {};
 
     // Extract NameID (usually email)

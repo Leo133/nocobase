@@ -37,7 +37,23 @@ export class PINAuth extends BaseAuth {
   }
 
   /**
-   * Hash a PIN for secure storage
+   * Hash a PIN for secure storage (async version)
+   */
+  static async hashPinAsync(pin: string, salt?: string): Promise<{ hash: string; salt: string }> {
+    const useSalt = salt || crypto.randomBytes(16).toString('hex');
+    return new Promise((resolve, reject) => {
+      crypto.pbkdf2(pin, useSalt, 10000, 64, 'sha512', (err, derivedKey) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ hash: derivedKey.toString('hex'), salt: useSalt });
+        }
+      });
+    });
+  }
+
+  /**
+   * Hash a PIN for secure storage (sync version - use for tests only)
    */
   static hashPin(pin: string, salt?: string): { hash: string; salt: string } {
     const useSalt = salt || crypto.randomBytes(16).toString('hex');
@@ -46,7 +62,15 @@ export class PINAuth extends BaseAuth {
   }
 
   /**
-   * Verify a PIN against a stored hash
+   * Verify a PIN against a stored hash (async)
+   */
+  static async verifyPinAsync(pin: string, storedHash: string, salt: string): Promise<boolean> {
+    const { hash } = await PINAuth.hashPinAsync(pin, salt);
+    return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(storedHash));
+  }
+
+  /**
+   * Verify a PIN against a stored hash (sync version - use for tests only)
    */
   static verifyPin(pin: string, storedHash: string, salt: string): boolean {
     const { hash } = PINAuth.hashPin(pin, salt);
@@ -70,7 +94,7 @@ export class PINAuth extends BaseAuth {
       ctx.throw(400, ctx.t('PIN must be exactly {{length}} digits', { ns: namespace, length: PIN_LENGTH }));
     }
 
-    const { hash, salt } = PINAuth.hashPin(pin);
+    const { hash, salt } = await PINAuth.hashPinAsync(pin);
 
     const pinSessionsRepo = ctx.db.getRepository(PIN_SESSIONS_COLLECTION);
 
@@ -130,8 +154,8 @@ export class PINAuth extends BaseAuth {
       );
     }
 
-    // Verify the PIN
-    const isValid = PINAuth.verifyPin(pin, pinSession.pinHash, pinSession.pinSalt);
+    // Verify the PIN (using async version)
+    const isValid = await PINAuth.verifyPinAsync(pin, pinSession.pinHash, pinSession.pinSalt);
 
     if (!isValid) {
       // Increment failed attempts

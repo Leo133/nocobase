@@ -84,6 +84,13 @@ export default {
   'PIN set up successfully': 'PIN 设置成功',
   'You must be logged in to validate PIN': '您必须登录才能验证 PIN',
   'You must be logged in': '您必须登录',
+  'Invalid state parameter - possible CSRF attack': '无效的状态参数 - 可能的 CSRF 攻击',
+  'Invalid relay state - possible CSRF attack': '无效的中继状态 - 可能的 CSRF 攻击',
+  'Failed to initiate OIDC login': '启动 OIDC 登录失败',
+  'Failed to initiate SAML login': '启动 SAML 登录失败',
+  'Failed to initiate OAuth login': '启动 OAuth 登录失败',
+  'Failed to set up PIN': '设置 PIN 失败',
+  'Allow PIN Authentication': '允许 PIN 认证',
 
   // UI
   'Sign in with OIDC': '使用 OIDC 登录',

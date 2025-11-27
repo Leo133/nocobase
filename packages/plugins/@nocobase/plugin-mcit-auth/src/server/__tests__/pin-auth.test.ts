@@ -10,7 +10,7 @@
 import { PINAuth } from '../providers/pin-auth';
 
 describe('PINAuth', () => {
-  describe('hashPin', () => {
+  describe('hashPin (sync)', () => {
     it('should hash a PIN with salt', () => {
       const { hash, salt } = PINAuth.hashPin('1234');
       expect(hash).toBeDefined();
@@ -39,7 +39,24 @@ describe('PINAuth', () => {
     });
   });
 
-  describe('verifyPin', () => {
+  describe('hashPinAsync', () => {
+    it('should hash a PIN with salt asynchronously', async () => {
+      const { hash, salt } = await PINAuth.hashPinAsync('1234');
+      expect(hash).toBeDefined();
+      expect(salt).toBeDefined();
+      expect(hash.length).toBeGreaterThan(0);
+      expect(salt.length).toBeGreaterThan(0);
+    });
+
+    it('should produce same hash with same salt', async () => {
+      const salt = 'testsalt123';
+      const { hash: hash1 } = await PINAuth.hashPinAsync('1234', salt);
+      const { hash: hash2 } = await PINAuth.hashPinAsync('1234', salt);
+      expect(hash1).toBe(hash2);
+    });
+  });
+
+  describe('verifyPin (sync)', () => {
     it('should return true for correct PIN', () => {
       const { hash, salt } = PINAuth.hashPin('1234');
       const result = PINAuth.verifyPin('1234', hash, salt);
@@ -58,6 +75,20 @@ describe('PINAuth', () => {
       // Using wrong salt should fail
       expect(salt).not.toBe(salt2);
       const result = PINAuth.verifyPin('1234', hash, salt2);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('verifyPinAsync', () => {
+    it('should return true for correct PIN', async () => {
+      const { hash, salt } = await PINAuth.hashPinAsync('1234');
+      const result = await PINAuth.verifyPinAsync('1234', hash, salt);
+      expect(result).toBe(true);
+    });
+
+    it('should return false for incorrect PIN', async () => {
+      const { hash, salt } = await PINAuth.hashPinAsync('1234');
+      const result = await PINAuth.verifyPinAsync('5678', hash, salt);
       expect(result).toBe(false);
     });
   });
