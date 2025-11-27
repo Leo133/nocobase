@@ -1,0 +1,23 @@
+{
+  "name": "@nocobase/plugin-mcit-data-editor",
+  "version": "2.0.0-alpha.42",
+  "main": "dist/server/index.js",
+  "displayName": "MCIT Data Editor",
+  "displayName.zh-CN": "MCIT 数据编辑器",
+  "description": "A NocoDB-style spreadsheet editor for NocoBase. Provides intuitive inline editing, bulk operations, advanced filtering, and multiple view modes (grid, form, kanban, calendar).",
+  "description.zh-CN": "NocoBase 的 NocoDB 风格电子表格编辑器。提供直观的内联编辑、批量操作、高级过滤和多种视图模式（网格、表单、看板、日历）。",
+  "homepage": "https://docs.nocobase.com/handbook/mcit-data-editor",
+  "homepage.zh-CN": "https://docs-cn.nocobase.com/handbook/mcit-data-editor",
+  "peerDependencies": {
+    "@nocobase/client": "2.x",
+    "@nocobase/server": "2.x",
+    "@nocobase/test": "2.x"
+  },
+  "keywords": [
+    "Data model tools",
+    "Spreadsheet",
+    "Data editor",
+    "NocoDB"
+  ],
+  "gitHead": "d0b4efe4be55f8c79a98a331d99d9f8cf99021a1"
+}
