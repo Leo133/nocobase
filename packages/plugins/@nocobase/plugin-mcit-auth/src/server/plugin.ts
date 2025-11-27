@@ -7,6 +7,7 @@
  * For more information, please refer to: https://www.nocobase.com/agreement.
  */
 
+import path from 'path';
 import { InstallOptions, Plugin } from '@nocobase/server';
 import { tval } from '@nocobase/utils';
 import {
@@ -23,7 +24,12 @@ import { PINAuth } from './providers/pin-auth';
 import mcitAuthActions from './actions/mcit-auth';
 
 export class PluginMcitAuthServer extends Plugin {
-  async afterAdd() {}
+  async afterAdd() {
+    // Load collections
+    await this.db.import({
+      directory: path.resolve(__dirname, 'collections'),
+    });
+  }
 
   async beforeLoad() {}
 
@@ -75,6 +81,7 @@ export class PluginMcitAuthServer extends Plugin {
     this.app.acl.allow('mcitAuth', 'signInWithPin', 'loggedIn');
     this.app.acl.allow('mcitAuth', 'setupPin', 'loggedIn');
     this.app.acl.allow('mcitAuth', 'validatePin', 'loggedIn');
+    this.app.acl.allow('mcitAuth', 'hasPinSetup', 'loggedIn');
 
     // Register audit actions
     this.app.auditManager?.registerActions([
