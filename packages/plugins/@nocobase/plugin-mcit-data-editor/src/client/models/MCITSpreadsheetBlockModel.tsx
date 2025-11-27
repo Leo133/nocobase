@@ -14,7 +14,6 @@ import {
   observable,
   autorun,
 } from '@nocobase/flow-engine';
-import { message } from 'antd';
 
 /**
  * View types supported by the MCIT spreadsheet editor
