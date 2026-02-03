@@ -139,11 +139,11 @@ export class PluginMCITDataEditorServer extends Plugin {
           async handler(ctx, next) {
             const { filterByTk, values } = ctx.action.params;
             const repository = ctx.db.getRepository('mcitViews');
-            await repository.update({
+            const view = await repository.update({
               filterByTk,
               values,
             });
-            ctx.body = { success: true };
+            ctx.body = view;
             await next();
           },
         },
@@ -167,7 +167,34 @@ export class PluginMCITDataEditorServer extends Plugin {
       actions: ['mcitViews:*'],
     });
 
-    this.app.acl.allow('mcitViews', '*', 'loggedIn');
+    // Allow users to manage their own views
+    this.app.acl.allow('mcitViews', ['list', 'get'], 'loggedIn');
+    this.app.acl.allow('mcitViews', ['create', 'update', 'destroy'], 'loggedIn');
+    
+    // Add filter to ensure users can only access their own views
+    this.app.acl.addFixedParams('mcitViews', 'list', () => {
+      return {
+        filter: {
+          'createdById.$isTruly': true,
+        },
+      };
+    });
+    
+    this.app.acl.addFixedParams('mcitViews', 'update', () => {
+      return {
+        filter: {
+          'createdById.$isTruly': true,
+        },
+      };
+    });
+    
+    this.app.acl.addFixedParams('mcitViews', 'destroy', () => {
+      return {
+        filter: {
+          'createdById.$isTruly': true,
+        },
+      };
+    });
   }
 
   async install() {

@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { css } from '@emotion/css';
-import { Card, List, Typography, Space, Tag, Input, Empty, Spin, Collapse, Button, Tooltip } from 'antd';
+import { Typography, Space, Tag, Input, Empty, Spin, Collapse, Button, Tooltip } from 'antd';
 import {
   DatabaseOutlined,
   TableOutlined,
@@ -19,7 +19,7 @@ import {
   AppstoreOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
-import { useAPIClient, useDataSourceManager } from '@nocobase/client';
+import { useAPIClient } from '@nocobase/client';
 import { useT } from '../locale';
 
 const { Title, Text, Paragraph } = Typography;
@@ -58,18 +58,6 @@ const searchWrapperClass = css`
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-`;
-
-const dataSourceCardClass = css`
-  margin-bottom: 16px;
-  
-  .ant-card-head {
-    background: #fafafa;
-  }
-  
-  .ant-card-body {
-    padding: 0;
-  }
 `;
 
 const collectionItemClass = css`
@@ -128,7 +116,6 @@ const statusTagClass = css`
 export const MCITDataEditorPage: React.FC = () => {
   const navigate = useNavigate();
   const apiClient = useAPIClient();
-  const dataSourceManager = useDataSourceManager();
   const t = useT();
   
   const [dataSources, setDataSources] = useState<DataSource[]>([]);

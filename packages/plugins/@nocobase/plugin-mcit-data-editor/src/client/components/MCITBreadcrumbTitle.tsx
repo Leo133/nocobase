@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAPIClient, useCompile } from '@nocobase/client';
 import { Breadcrumb, Typography } from 'antd';
 import { useT } from '../locale';
 
@@ -18,7 +17,6 @@ const { Text } = Typography;
 export const MCITBreadcrumbTitle: React.FC = () => {
   const params = useParams<{ dataSource?: string; collection?: string }>();
   const navigate = useNavigate();
-  const compile = useCompile();
   const t = useT();
 
   const dataSourceName = params.dataSource || 'main';

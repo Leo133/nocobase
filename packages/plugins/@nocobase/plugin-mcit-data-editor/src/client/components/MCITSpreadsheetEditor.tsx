@@ -19,13 +19,9 @@ import {
   Modal,
   message,
   Tooltip,
-  Checkbox,
-  Spin,
   Typography,
   Tag,
-  Popover,
   Form,
-  Select,
   DatePicker,
   InputNumber,
   Switch,
@@ -42,10 +38,7 @@ import {
   MoreOutlined,
   SearchOutlined,
   SettingOutlined,
-  DownloadOutlined,
-  UploadOutlined,
   CopyOutlined,
-  EyeOutlined,
   EyeInvisibleOutlined,
   TableOutlined,
   AppstoreOutlined,
@@ -54,16 +47,11 @@ import {
   ExpandOutlined,
   ArrowLeftOutlined,
   ReloadOutlined,
-  EditOutlined,
-  CheckOutlined,
-  CloseOutlined,
-  MenuOutlined,
 } from '@ant-design/icons';
 import { useAPIClient, useDataSourceManager } from '@nocobase/client';
 import { useT } from '../locale';
 
 const { Text, Title } = Typography;
-const { TabPane } = Tabs;
 
 // View types supported by the editor
 export type ViewType = 'grid' | 'form' | 'kanban' | 'calendar' | 'gallery';
@@ -228,7 +216,7 @@ export const MCITSpreadsheetEditor: React.FC<MCITSpreadsheetEditorProps> = (prop
   const [editingCell, setEditingCell] = useState<{ rowKey: string; fieldName: string } | null>(null);
   const [editingValue, setEditingValue] = useState<any>(null);
   const [searchText, setSearchText] = useState('');
-  const [filters, setFilters] = useState<any[]>([]);
+  const [filters] = useState<any[]>([]);
   const [sorts, setSorts] = useState<any[]>([]);
   const [visibleFields, setVisibleFields] = useState<string[]>([]);
   const [viewType, setViewType] = useState<ViewType>('grid');
@@ -266,6 +254,7 @@ export const MCITSpreadsheetEditor: React.FC<MCITSpreadsheetEditorProps> = (prop
     setLoading(true);
     try {
       const filterParams: any = {};
+      const filterConditions: any[] = [];
       
       // Apply search filter
       if (searchText) {
@@ -274,19 +263,43 @@ export const MCITSpreadsheetEditor: React.FC<MCITSpreadsheetEditorProps> = (prop
           ['string', 'text', 'email', 'url', 'phone'].includes(f.type)
         );
         if (searchableFields.length > 0) {
-          filterParams.$or = searchableFields.map((f) => ({
-            [f.name]: { $includes: searchText },
-          }));
+          filterConditions.push({
+            $or: searchableFields.map((f) => ({
+              [f.name]: { $iLike: `%${searchText}%` },
+            })),
+          });
         }
       }
 
       // Apply custom filters
       if (filters.length > 0) {
+        const customFilterConditions: any = {};
         filters.forEach((filter) => {
           if (filter.field && filter.operator && filter.value !== undefined) {
-            filterParams[filter.field] = { [`$${filter.operator}`]: filter.value };
+            if (!customFilterConditions[filter.field]) {
+              customFilterConditions[filter.field] = [];
+            }
+            customFilterConditions[filter.field].push({ [`$${filter.operator}`]: filter.value });
           }
         });
+        
+        // Add each field's filters as AND conditions
+        Object.keys(customFilterConditions).forEach((field) => {
+          if (customFilterConditions[field].length === 1) {
+            filterConditions.push({ [field]: customFilterConditions[field][0] });
+          } else {
+            filterConditions.push({ $and: customFilterConditions[field].map((cond) => ({ [field]: cond })) });
+          }
+        });
+      }
+
+      // Combine all conditions
+      if (filterConditions.length > 0) {
+        if (filterConditions.length === 1) {
+          Object.assign(filterParams, filterConditions[0]);
+        } else {
+          filterParams.$and = filterConditions;
+        }
       }
 
       const response = await apiClient.request({
@@ -407,10 +420,6 @@ export const MCITSpreadsheetEditor: React.FC<MCITSpreadsheetEditorProps> = (prop
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCellCancel();
-    } else if (e.key === 'Tab') {
-      e.preventDefault();
-      handleCellSave();
-      // Move to next cell logic would go here
     }
   };
 
@@ -526,9 +535,11 @@ export const MCITSpreadsheetEditor: React.FC<MCITSpreadsheetEditorProps> = (prop
         return (
           <Switch
             checked={editingValue}
-            onChange={(checked) => {
+            onChange={async (checked) => {
               setEditingValue(checked);
-              setTimeout(() => handleCellSave(), 0);
+              // Auto-save on toggle
+              const currentCell = editingCell;
+              await handleCellSave();
             }}
             size="small"
           />
@@ -538,9 +549,10 @@ export const MCITSpreadsheetEditor: React.FC<MCITSpreadsheetEditorProps> = (prop
           <DatePicker
             {...commonProps}
             value={editingValue}
-            onChange={(date) => {
+            onChange={async (date) => {
               setEditingValue(date);
-              setTimeout(() => handleCellSave(), 0);
+              // Auto-save on date selection
+              await handleCellSave();
             }}
           />
         );
@@ -550,9 +562,10 @@ export const MCITSpreadsheetEditor: React.FC<MCITSpreadsheetEditorProps> = (prop
             {...commonProps}
             showTime
             value={editingValue}
-            onChange={(date) => {
+            onChange={async (date) => {
               setEditingValue(date);
-              setTimeout(() => handleCellSave(), 0);
+              // Auto-save on datetime selection
+              await handleCellSave();
             }}
           />
         );

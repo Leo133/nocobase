@@ -159,14 +159,15 @@ export class MCITSpreadsheetBlockModel extends CollectionBlockModel<MCITSpreadsh
     }
 
     try {
-      await this.resource.save({ [fieldName]: this.editingValue.value });
+      // Update the specific record with filterByTk
+      await this.resource.update(rowKey, { [fieldName]: this.editingValue.value });
       
       // Update local data
       record[fieldName] = this.editingValue.value;
       this.context.message?.success(this.context.t('Saved'));
     } catch (error) {
       console.error('Failed to save cell:', error);
-      this.context.message?.error(this.context.t('Failed to save'));
+      this.context.message?.error(this.context.t('Failed to save') + ': ' + (error.message || 'Unknown error'));
     } finally {
       this.cancelEditing();
     }
@@ -182,7 +183,7 @@ export class MCITSpreadsheetBlockModel extends CollectionBlockModel<MCITSpreadsh
       this.context.message?.success(this.context.t('Row added'));
     } catch (error) {
       console.error('Failed to add row:', error);
-      this.context.message?.error(this.context.t('Failed to add row'));
+      this.context.message?.error(this.context.t('Failed to add row') + ': ' + (error.message || 'Unknown error'));
     }
   }
 
